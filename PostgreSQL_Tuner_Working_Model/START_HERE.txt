@@ -1,0 +1,88 @@
+POSTGRESQL DATABASE SETTINGS TUNER — PRESENTATION READY
+=====================================================
+
+OPTION 1 — FAST TEACHER PRESENTATION (recommended)
+---------------------------------------------------
+1. Unzip the project.
+2. Double-click index.html to open it in Chrome, Safari, or another modern browser.
+3. The first tab shows the real CSV results and lets you select any bar.
+4. Go to “Interactive lab”, change shared_buffers / work_mem, and show the result.
+5. Click “Start replay” to demonstrate the full grid-search logic using
+   the 18 ACTUAL SAVED readings. This replay is NOT a fresh benchmark.
+6. Open “Presentation guide” to see a 1-minute talk and short viva answers.
+7. Optionally import another correctly formatted results CSV; the app will
+   recompute means, rankings, and percentage differences.
+
+This offline HTML presentation requires NO installations, Internet, or server.
+Double-clicking HTML is enough.
+
+OPTION 2 — RUN A QUICK LIVE BENCHMARK (great for teacher demo)
+-------------------------------------------------------------------
+If PostgreSQL 18 is already running and pgbench_test was initialized,
+run in Terminal from this folder:
+
+  python3 quick_benchmark.py
+
+This measures FRESH transactions per second in about 10 seconds, using
+CURRENT PostgreSQL settings, without changing settings or restarting service.
+It needs a functioning PostgreSQL installation and pgbench.
+
+OPTION 3 — RUN THE FULL POSTGRESQL TUNING GRID (advanced)
+--------------------------------------------------
+Requirements: macOS, Homebrew PostgreSQL 18, Python 3, pgbench.
+Use ONLY on a local TEST PostgreSQL installation. Do not use on production.
+
+First, verify PostgreSQL 18 and pgbench are installed. If starting fresh,
+open a Terminal in this folder and run:
+
+  brew services start postgresql@18
+  createdb pgbench_test
+  pgbench -i -s 10 pgbench_test
+
+(If the test database already exists and is initialized, skip creation/init.)
+Then run:
+
+  python3 tuner.py
+
+The script sets memory parameters using ALTER SYSTEM, RESTARTS the local
+PostgreSQL 18 service, runs three 30-second tests for each of six settings,
+and writes results_new.csv. This can take more than 10 minutes. It tries to
+restore 128MB shared_buffers and 4MB work_mem upon normal completion/error.
+A hard termination or machine shutdown can interrupt restoration. Verify
+both settings afterward:
+
+  psql -d pgbench_test -c "SHOW shared_buffers;"
+  psql -d pgbench_test -c "SHOW work_mem;"
+
+The actual historical CSV is results.csv and is never overwritten.
+To create a graph with the new results, install matplotlib if needed:
+
+  python3 -m pip install matplotlib
+  python3 graph.py results_new.csv
+
+That regenerates performance_graph.png for the selected CSV.
+NOTE: the standalone dashboard loads the original embedded results by default.
+You can import results_new.csv in the dashboard (Import CSV) to display
+new readings; results are not automatically synced to a browser tab.
+
+WHAT TO SAY TO YOUR TEACHER
+--------------------------
+"Our project automates PostgreSQL database configuration testing. We used
+Python to test six shared_buffers/work_mem combinations. pgbench measured TPS
+three times for each configuration. The project automatically saves the
+observations and compares averages. On this test system, the default values
+produced the highest recorded average of 25,248.09 transactions per second."
+
+IMPORTANT: The dashboard and replay visualize genuine recorded experiment
+results; they are not a live database or a synthetic TPS predictor. The
+separate tuner.py can perform new benchmarks when PostgreSQL is available.
+One workload cannot prove the universal best setting for every database.
+
+TEAM / DEPARTMENT
+-----------------
+Deepak Purve      25124021
+Deepanshu Roila   25124022
+Diksha            25124023
+Divyang Kapri     25124024
+Department: IT
+Faculty: HOD
